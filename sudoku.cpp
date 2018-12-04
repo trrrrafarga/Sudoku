@@ -15,10 +15,6 @@ void print()
 int main(int argc, char const *argv[])
 {
 	int N,i;
-	for (int i = 1; i < 10; ++i)
-	{
-		num.insert(i);
-	}
 	scanf("%d",&N);
 	int theFirstPoint = (2 + 5)% 9 + 1;
 	if (N > 0)
