@@ -2,12 +2,22 @@
 #include "algorithm"
 #include "fstream"
 #include "string"
+#include "cstring"
+#include "cmath"
+#include "time.h"
+#include "cstdio"
+#include "cstdlib"
 using namespace std;
 
 ofstream print_sudoku("sudoku.txt");
+ofstream print_solve_sudoku("sudoku.txt");
 int origin[10] = {1,2,3,4,5,6,7,9}; 
 int count_num = 0,data_count = 0;
 char output_sudoku[500000000];
+
+int sudoku_map[30][9][9];
+int tempt[9] = {1,2,3,4,5,6,7,8,9};
+
 void change_map(char *rule)
 {
 	for (int i = 0; i < 3; ++i)
@@ -64,18 +74,131 @@ void print1()
 {
 	print_sudoku << output_sudoku;
 }
-int main(int argc, char const *argv[])
+
+int judge(int s,int x,int y,int num){    //判断填充合法
+
+	for (int i = 0; i < 9; i++){    //当前行、列合法判断
+		if (sudoku_map[s][x][i] == num)
+			return 0;
+		if (sudoku_map[s][i][y] == num)
+			return 0;
+	}
+	int area_x = x - x % 3, area_y = y - y % 3;    //计算所处宫格左上角坐标
+	for (int i = area_x; i < area_x+3; i++)    //当前宫格合法判断
+		for (int j = area_y; j < area_y+3;j++)
+			if (sudoku_map[s][i][j] == num)
+				return 0;
+
+	return 1;
+}
+
+int solve(int s,int a,int b)
 {
-	int N,i;
-	scanf("%d",&N);
-	if (N > 0)
+	int init,next_a,next_b;
+	init = sudoku_map[s][a][b];
+	next_a = a + (b + 1) / 9;
+	next_b = (b + 1) % 9;
+
+	if(a == 9)
+		return 1;
+	if(sudoku_map[s][a][b] != 0)
 	{
-		buildMove(N);
-		print1();
+		if(solve(s,next_a,next_b))
+			return 1;
 	}
 	else
 	{
-		printf("hhhhh\n");
+		for (int i = 0; i < 9; ++i)
+		{
+			int trynum = tempt[i];
+			if(judge(s,a,b,trynum))
+			{
+				sudoku_map[s][a][b] = trynum;
+				if(solve(s,next_a,next_b))
+					return 1;
+			}
+		}
+	}
+
+	sudoku_map[s][a][b] = init;
+
+	return 0;
+}
+int main(int argc, char const *argv[])
+{
+	int N = 0;
+	//scanf("%d",&N);
+	//FILE *fp1 = fopen(argv[2], "r");
+
+	if (argc == 3 && strcmp(argv[1], "-c") == 0)
+	{
+		int len = strlen(argv[2]);
+		
+		for (int i = 0; i < len; ++i)
+		{
+			if (argv[2][i] >= '0' && argv[2][i] <= '9')
+			{
+				N += ((argv[2][i] - '0')*pow(10, len - i - 1));
+				//printf("%d",N);
+			}
+			else
+			{
+				printf("Error!\n");
+				return 0;
+			}
+		}
+			buildMove(N);
+		print1();
+	}
+	else if(argc == 3 && strcmp(argv[1], "-s") == 0)
+	{
+		//printf("****\n");
+		int i = 0,j = 0;
+		freopen(argv[2],"r",stdin);
+		printf("%s\n",argv[2]);
+		freopen("sudoku.txt", "w", stdout);
+		//printf("****\n");
+		while(~scanf("%d",&sudoku_map[0][i][j]))
+		{
+			//printf("%d\n",sudoku_map[0][i][j]);
+			i += (j + 1) / 9;
+			j = (j + 1) % 9;
+			if (i == 9)
+			{		
+				solve(0,0,0);
+
+				i = j = 0;
+				for (int i = 0; i < 9; ++i)
+				{
+					for (int j = 0; j < 9; ++j)
+					{
+						if(j == 8)
+							putchar('\n');
+						else
+						{
+							putchar(sudoku_map[0][i][j] + '0');
+							putchar(' ');
+						}
+					}
+				}
+				putchar('\n');
+			}
+		}
+
+		fclose(stdin);
+		fclose(stdout);
 	}
 	return 0;
 }
+
+/*
+8 0 0 0 0 0 0 0 1
+9 0 0 0 2 0 0 0 3
+0 3 0 0 5 0 0 7 0
+0 0 5 0 0 0 4 0 0
+0 0 4 5 0 9 6 0 0
+0 0 0 8 0 1 0 0 0
+0 0 0 0 0 0 0 0 0
+0 4 6 0 0 0 8 2 0
+0 2 0 3 0 5 0 9 0
+*/
