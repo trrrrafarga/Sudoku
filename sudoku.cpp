@@ -4,21 +4,19 @@
 #include "string"
 #include "cstring"
 #include "cmath"
-#include "time.h"
 #include "cstdio"
 #include "cstdlib"
 using namespace std;
 
 ofstream print_sudoku("sudoku.txt");
-ofstream print_solve_sudoku("sudoku.txt");
-int origin[10] = {1,2,3,4,5,6,7,9}; 
+int origin[10] = {1,2,3,4,5,6,7,9}; //为使得第一个数字为(2 + 5)%9 + 1 我们全排列不考虑8
 int count_num = 0,data_count = 0;
-char output_sudoku[500000000];
+char output_sudoku[500000000];//为了方便我们牺牲空间,节约时间,一次输出
 
-int sudoku_map[30][9][9];
+int sudoku_map[10][9][9];
 int tempt[9] = {1,2,3,4,5,6,7,8,9};
 
-void change_map(char *rule)
+void change_map(char *rule) //进行变换
 {
 	for (int i = 0; i < 3; ++i)
 	{
@@ -45,7 +43,7 @@ void buildMove(int N)
 {
 	char rule1[10][5] = {"036","063"};
 	char rule2[10][5] = {"258","285","528","582","825","852"};
-	char rule3[10][5] = {"147","174","417","471","714","741"};
+	char rule3[10][5] = {"147","174","417","471","714","741"}; //变换规则
 	while(1)
 	{
 		if(next_permutation(origin,origin + 8))
@@ -66,8 +64,7 @@ void buildMove(int N)
 			}
 		}
 		else
-			break;
-		
+			break;		
 	}
 } 
 void print1()
@@ -75,9 +72,11 @@ void print1()
 	print_sudoku << output_sudoku;
 }
 
-int judge(int s,int x,int y,int num){    //判断填充合法
+int judge(int s,int x,int y,int num)
+{//判断填充合法
 
-	for (int i = 0; i < 9; i++){    //当前行、列合法判断
+	for (int i = 0; i < 9; i++)
+	{    //当前行、列合法判断
 		if (sudoku_map[s][x][i] == num)
 			return 0;
 		if (sudoku_map[s][i][y] == num)
@@ -138,7 +137,7 @@ int main(int argc, char const *argv[])
 		{
 			if (argv[2][i] >= '0' && argv[2][i] <= '9')
 			{
-				N += ((argv[2][i] - '0')*pow(10, len - i - 1));
+				N += ((argv[2][i] - '0')*pow((float)10, len - i - 1));
 				//printf("%d",N);
 			}
 			else
@@ -187,9 +186,11 @@ int main(int argc, char const *argv[])
 
 		fclose(stdin);
 		fclose(stdout);
+		return 0;
 	}
 	return 0;
 }
+
 
 /*
 8 0 0 0 0 0 0 0 1
@@ -202,3 +203,4 @@ int main(int argc, char const *argv[])
 0 4 6 0 0 0 8 2 0
 0 2 0 3 0 5 0 9 0
 */
+
